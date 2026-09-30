@@ -27,6 +27,7 @@ const SUPABASE_KEY="sb_publishable_NMAq5b6mRp-eD3mkbWGGgQ_PtDIzqY-";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let profile=null;
 const $=id=>document.getElementById(id);
+async function gerarSAFT(){const inicio=prompt("Data inicial (AAAA-MM-DD):",new Date().getFullYear()+"-01-01");if(!inicio)return;const fim=prompt("Data final (AAAA-MM-DD):",new Date().toISOString().slice(0,10));if(!fim)return;const {data,error}=await sb.functions.invoke("saft-gerar",{body:{periodo_inicio:inicio,periodo_fim:fim,tipo:"F",instituicao_id:profile.instituicao_id}});if(error){alert(error.message||"Falha ao gerar SAF-T");return}if(data?.alertas?.length)alert("SAF-T gerado com alertas:\n\n"+data.alertas.join("\n"));if(data?.url){const a=document.createElement("a");a.href=data.url;a.target="_blank";a.rel="noopener";a.download="SAFT-AO.xml";a.click()}else alert("SAF-T gerado, mas o ficheiro não recebeu URL temporária.");await agt()}
 function money(v){return Number(v||0).toLocaleString("pt-AO",{minimumFractionDigits:2,maximumFractionDigits:2})+" AOA"}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&#39;",'"':"&quot;","'":"&#39;"}[m]))}
 async function loadProfile(){
