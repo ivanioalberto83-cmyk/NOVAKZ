@@ -1,88 +1,66 @@
 <!doctype html>
 <html lang="pt-AO">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NOVA TODDLE SCHOOL — Interface</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOVA TODDLE SCHOOL — Gestão</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--navy:#102a43;--blue:#2f80ed;--cyan:#22c1c3;--violet:#6c63ff;--gold:#f4c95d;--bg:#f5f8fc;--ink:#18324b;--muted:#6b7c93;--white:#fff}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-.page{min-height:100vh;display:grid;grid-template-columns:1.08fr .92fr}
-.brand{position:relative;overflow:hidden;padding:56px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(145deg,#102a43 0%,#164e75 52%,#2f80ed 100%);color:white}
-.brand:before,.brand:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.08)}
-.brand:before{width:440px;height:440px;right:-180px;top:-150px}.brand:after{width:320px;height:320px;left:-180px;bottom:-120px}
-.logo{position:relative;z-index:1;display:flex;align-items:center;gap:14px;font-weight:800;font-size:20px;letter-spacing:.3px}
-.mark{width:54px;height:54px;border-radius:17px;background:linear-gradient(135deg,var(--cyan),var(--violet));display:grid;place-items:center;box-shadow:0 12px 30px rgba(0,0,0,.18);font-weight:900;font-size:19px}
-.hero{position:relative;z-index:1;max-width:590px;margin:auto 0}
-.kicker{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.13);font-size:12px;font-weight:800;letter-spacing:.9px;text-transform:uppercase}
-h1{font-size:clamp(42px,5vw,72px);line-height:.98;margin:20px 0 18px;letter-spacing:-3px}
-.hero p{font-size:18px;line-height:1.65;color:rgba(255,255,255,.82);max-width:510px}
-.features{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:650px}
-.feature{padding:15px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(255,255,255,.08);backdrop-filter:blur(8px)}
-.feature b{display:block;font-size:13px}.feature span{display:block;margin-top:5px;color:rgba(255,255,255,.7);font-size:11px}
-.login-wrap{display:flex;align-items:center;justify-content:center;padding:34px}
-.card{width:min(460px,100%);background:white;border:1px solid #e5ebf2;border-radius:28px;padding:38px;box-shadow:0 22px 70px rgba(16,42,67,.10)}
-.mobile-logo{display:none}.eyebrow{color:var(--blue);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px}
-h2{font-size:31px;margin:8px 0 8px;color:var(--navy)}.sub{margin:0 0 28px;color:var(--muted);line-height:1.55}
-label{display:block;font-size:13px;font-weight:800;margin:17px 0 8px}
-input,select{width:100%;border:1px solid #dce5ee;border-radius:13px;padding:14px 15px;font-size:15px;outline:none;background:#fbfdff;color:var(--ink)}
-input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(47,128,237,.10)}
-.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.remember{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:15px}.remember input{width:auto}
-a{color:var(--blue);text-decoration:none;font-weight:700;font-size:12px}
-button{width:100%;border:0;border-radius:14px;padding:15px;margin-top:24px;background:linear-gradient(135deg,var(--blue),var(--violet));color:white;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 12px 24px rgba(47,128,237,.22)}
-.divider{display:flex;align-items:center;gap:12px;color:#9aaabd;font-size:11px;margin:24px 0}.divider:before,.divider:after{content:"";height:1px;background:#e6edf4;flex:1}
-.demo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.demo button{margin:0;background:#f1f6fb;color:var(--navy);box-shadow:none;border:1px solid #e1e9f1;font-size:12px}
-.status{display:none;margin-top:14px;padding:11px 12px;border-radius:11px;background:#edf9f4;color:#23704d;font-size:12px;font-weight:700}
-.footer{margin-top:25px;text-align:center;color:#9aaabd;font-size:11px}
-@media(max-width:850px){.page{grid-template-columns:1fr}.brand{display:none}.mobile-logo{display:flex;align-items:center;gap:12px;margin-bottom:25px}.login-wrap{padding:20px}.card{padding:28px;border-radius:22px}}
+:root{--navy:#102a43;--blue:#2f80ed;--cyan:#22c1c3;--violet:#6c63ff;--bg:#f5f8fc;--ink:#18324b;--muted:#6b7c93;--white:#fff;--line:#e4ebf2}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input{font:inherit}.hidden{display:none!important}
+.login{min-height:100vh;display:grid;grid-template-columns:1.08fr .92fr}.brand{padding:56px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(145deg,#102a43,#164e75 52%,#2f80ed);color:#fff}.mark{width:54px;height:54px;border-radius:17px;background:linear-gradient(135deg,var(--cyan),var(--violet));display:grid;place-items:center;font-weight:900}.logo{display:flex;align-items:center;gap:14px;font-weight:800}.hero h1{font-size:clamp(42px,5vw,72px);line-height:.98;margin:20px 0}.hero p{max-width:540px;font-size:18px;line-height:1.6;color:#dcecff}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.feature{padding:15px;border:1px solid #ffffff25;border-radius:16px;background:#ffffff12}.login-wrap{display:flex;align-items:center;justify-content:center;padding:34px}.card{width:min(460px,100%);background:#fff;border:1px solid var(--line);border-radius:28px;padding:38px;box-shadow:0 22px 70px #102a4318}label{display:block;font-size:13px;font-weight:800;margin:17px 0 8px}input{width:100%;border:1px solid #dce5ee;border-radius:13px;padding:14px;background:#fbfdff}.btn{border:0;border-radius:13px;padding:13px 16px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;font-weight:900;cursor:pointer}.full{width:100%;margin-top:22px}.status{margin-top:14px;padding:11px;border-radius:11px;background:#eef6ff;color:#225b91;font-size:12px}
+.app{min-height:100vh;display:grid;grid-template-columns:245px 1fr}.side{background:var(--navy);color:#fff;padding:22px 16px}.side .logo{margin-bottom:30px}.nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#d9e7f5;padding:13px;border-radius:10px;cursor:pointer;margin:4px 0}.nav button.active,.nav button:hover{background:#ffffff14;color:#fff}.logout{margin-top:30px;background:#ffffff12!important}.main{padding:28px;overflow:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:24px}.top h1{margin:0;font-size:28px}.pill{background:#fff;border:1px solid var(--line);padding:10px 13px;border-radius:999px;font-size:12px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 25px #102a4308}.stat b{display:block;font-size:25px;margin-top:6px}.muted{color:var(--muted);font-size:12px}.panel{margin-top:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.panel h2{margin:0;font-size:18px}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:11px 8px;border-bottom:1px solid #edf1f5;text-align:left}.badge{padding:5px 8px;border-radius:999px;background:#eef6ff;font-size:11px;font-weight:800}.actions{display:flex;gap:6px;flex-wrap:wrap}.mini{border:1px solid #dbe5ee;background:#fff;color:var(--navy);padding:7px 9px;border-radius:8px;font-size:11px;cursor:pointer}.empty{padding:30px;text-align:center;color:var(--muted)}
+@media(max-width:900px){.login{grid-template-columns:1fr}.brand{display:none}.app{grid-template-columns:1fr}.side{position:relative}.grid{grid-template-columns:repeat(2,1fr)}.main{padding:18px}}
 </style>
 </head>
 <body>
-<div class="page">
-<section class="brand">
-  <div class="logo"><div class="mark">NT</div><div>NOVA TODDLE SCHOOL</div></div>
-  <div class="hero">
-    <span class="kicker">Educação • Gestão • Família</span>
-    <h1>Um novo espaço para aprender e crescer.</h1>
-    <p>Interface inicial do NOVA TODDLE SCHOOL, preparada para concentrar alunos, famílias, professores e gestão numa experiência simples, segura e moderna.</p>
-  </div>
-  <div class="features">
-    <div class="feature"><b>Famílias</b><span>Acompanhamento escolar</span></div>
-    <div class="feature"><b>Professores</b><span>Turmas e atividades</span></div>
-    <div class="feature"><b>Gestão</b><span>Painel centralizado</span></div>
-  </div>
+<section id="loginView" class="login">
+ <div class="brand"><div class="logo"><div class="mark">NT</div>NOVA TODDLE SCHOOL</div><div class="hero"><small>EDUCAÇÃO • GESTÃO • FAMÍLIA</small><h1>Um novo espaço para aprender e crescer.</h1><p>Gestão académica, financeira e documental numa única plataforma.</p></div><div class="features"><div class="feature"><b>Famílias</b><span>Acompanhamento escolar</span></div><div class="feature"><b>Professores</b><span>Turmas e avaliações</span></div><div class="feature"><b>Gestão</b><span>Faturação e contabilidade</span></div></div></div>
+ <div class="login-wrap"><div class="card"><div class="logo" style="color:#102a43;margin-bottom:24px"><div class="mark">NT</div>NOVA TODDLE SCHOOL</div><small style="color:#2f80ed;font-weight:900">ÁREA RESERVADA</small><h2>Entrar na plataforma</h2><p class="muted">Aceda ao seu espaço de aprendizagem e gestão.</p><form id="loginForm"><label>E-mail</label><input id="email" type="email" required placeholder="seu@email.com"><label>Palavra-passe</label><input id="password" type="password" required placeholder="••••••••"><button class="btn full">Entrar no NOVA TODDLE SCHOOL</button></form><div id="loginStatus" class="status hidden"></div></div></div>
 </section>
-<main class="login-wrap">
-  <div class="card">
-    <div class="mobile-logo"><div class="mark">NT</div><strong>NOVA TODDLE SCHOOL</strong></div>
-    <div class="eyebrow">Área reservada</div>
-    <h2>Entrar na plataforma</h2>
-    <p class="sub">Aceda ao seu espaço de aprendizagem e gestão.</p>
-    <form id="login">
-      <label for="email">E-mail</label>
-      <input id="email" type="email" placeholder="seu@email.com" autocomplete="username" required>
-      <label for="password">Palavra-passe</label>
-      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
-      <div class="row">
-        <label class="remember"><input type="checkbox"> Lembrar sessão</label>
-        <a href="#" onclick="return false">Esqueci a palavra-passe</a>
-      </div>
-      <button type="submit">Entrar no NOVA TODDLE SCHOOL</button>
-      <div id="status" class="status"></div>
-    </form>
-    <div class="divider">acesso de demonstração visual</div>
-    <div class="demo">
-      <button type="button" onclick="demo('Família')">Família</button>
-      <button type="button" onclick="demo('Professor')">Professor</button>
-    </div>
-    <div class="footer">NOVA TODDLE SCHOOL • Interface 1.0 • Luanda, Angola</div>
-  </div>
-</main>
-</div>
+<section id="appView" class="app hidden">
+ <aside class="side"><div class="logo"><div class="mark">NT</div><span>NOVA TODDLE</span></div><nav class="nav"><button data-page="inicio" class="active">⌂ Visão geral</button><button data-page="financeiro">€ Financeiro</button><button data-page="documentos">▣ Documentos</button><button data-page="contabilidade">▤ Contabilidade</button><button data-page="alunos">👥 Alunos</button></nav><button id="logout" class="nav logout">↪ Terminar sessão</button></aside>
+ <main class="main"><div class="top"><div><h1 id="pageTitle">Visão geral</h1><span id="userInfo" class="muted"></span></div><span class="pill">NOVA TODDLE SCHOOL</span></div><div id="content"></div></main>
+</section>
 <script>
-const form=document.getElementById('login'),status=document.getElementById('status');
-form.addEventListener('submit',e=>{e.preventDefault();status.style.display='block';status.textContent='Interface de login pronta. A autenticação será ligada ao backend na próxima etapa.'});
-function demo(role){document.getElementById('email').value=role.toLowerCase()+'@novatoddle.ao';document.getElementById('password').value='';status.style.display='block';status.textContent='Modo '+role+' selecionado para demonstração visual.'}
+const SUPABASE_URL="https://rojyxfjaidyvtmsmefcf.supabase.co";
+const SUPABASE_KEY="sb_publishable_NMAq5b6mRp-eD3mkbWGGgQ_PtDIzqY-";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let profile=null;
+const $=id=>document.getElementById(id);
+function money(v){return Number(v||0).toLocaleString("pt-AO",{minimumFractionDigits:2,maximumFractionDigits:2})+" AOA"}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&#39;",'"':"&quot;","'":"&#39;"}[m]))}
+async function loadProfile(){
+ const {data:{user}}=await sb.auth.getUser(); if(!user) return null;
+ const {data}=await sb.from("perfis").select("id,role,instituicao_id").eq("id",user.id).single(); profile=data; $("userInfo").textContent=user.email+" • "+(data?.role||"utilizador"); return data;
+}
+async function boot(){const {data:{session}}=await sb.auth.getSession(); if(session){profile=await loadProfile(); showApp();} else showLogin();}
+function showLogin(){$("loginView").classList.remove("hidden");$("appView").classList.add("hidden")}
+function showApp(){$("loginView").classList.add("hidden");$("appView").classList.remove("hidden");render("inicio")}
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginStatus").classList.remove("hidden");$("loginStatus").textContent="A autenticar…";const {error}=await sb.auth.signInWithPassword({email:$("email").value,password:$("password").value});if(error){$("loginStatus").textContent=error.message;return}profile=await loadProfile();showApp()});
+$("logout").onclick=async()=>{await sb.auth.signOut();showLogin()};
+document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>render(b.dataset.page));
+async function render(page){
+ document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ const titles={inicio:"Visão geral",financeiro:"Financeiro",documentos:"Documentos",contabilidade:"Contabilidade",alunos:"Alunos"};$("pageTitle").textContent=titles[page]||page;
+ if(page==="inicio")return overview(); if(page==="financeiro")return finance(); if(page==="documentos")return docs(); if(page==="contabilidade")return accounting(); $("content").innerHTML='<div class="panel"><h2>Alunos</h2><div class="empty">Módulo académico em integração.</div></div>';
+}
+async function overview(){
+ const [c,p,d]=await Promise.all([sb.from("cobrancas_escolares").select("id,valor,estado",{count:"exact"}),sb.from("pagamentos_escolares").select("id,valor",{count:"exact"}),sb.from("documentos_fiscais").select("id,total,estado",{count:"exact"})]);
+ const total=(c.data||[]).reduce((s,x)=>s+Number(x.valor||0),0),paid=(p.data||[]).reduce((s,x)=>s+Number(x.valor||0),0);
+ $("content").innerHTML='<div class="grid"><div class="stat"><span class="muted">Cobranças</span><b>'+((c.count)||0)+'</b></div><div class="stat"><span class="muted">Faturação</span><b>'+((d.count)||0)+'</b></div><div class="stat"><span class="muted">Cobrado</span><b>'+money(total)+'</b></div><div class="stat"><span class="muted">Recebido</span><b>'+money(paid)+'</b></div></div><div class="panel"><div class="panel-head"><h2>Fluxo financeiro</h2><button class="mini" onclick="render('documentos')">Ver documentos</button></div><p class="muted">Cobrança → Fatura → Pagamento → Recibo → Contabilidade → SAF-T.</p></div>';
+}
+async function finance(){
+ const {data,error}=await sb.from("v_fluxo_financeiro_escolar").select("*").order("vencimento",{ascending:false}).limit(100);
+ if(error){$("content").innerHTML='<div class="panel"><div class="empty">'+esc(error.message)+'</div></div>';return}
+ $("content").innerHTML='<div class="panel"><div class="panel-head"><h2>Contas a receber</h2><span class="badge">'+(data?.length||0)+' registos</span></div><table class="table"><thead><tr><th>Descrição</th><th>Valor</th><th>Pago</th><th>Saldo</th><th>Estado</th></tr></thead><tbody>'+((data||[]).map(x=>'<tr><td>'+esc(x.descricao)+'</td><td>'+money(x.valor)+'</td><td>'+money(x.valor_pago)+'</td><td>'+money(x.saldo)+'</td><td><span class="badge">'+esc(x.estado)+'</span></td></tr>').join("")||'<tr><td colspan="5" class="empty">Sem cobranças.</td></tr>')+'</tbody></table></div>';
+}
+async function docs(){
+ const {data,error}=await sb.from("documentos_gerados").select("id,tipo,formato,conteudo_url,gerado_em,documento_fiscal_id,metadados").order("gerado_em",{ascending:false}).limit(100);
+ if(error){$("content").innerHTML='<div class="panel"><div class="empty">'+esc(error.message)+'</div></div>';return}
+ $("content").innerHTML='<div class="panel"><div class="panel-head"><h2>Documentos gerados</h2><button class="mini" onclick="render(\'financeiro\')">Contas a receber</button></div><table class="table"><thead><tr><th>Tipo</th><th>Referência</th><th>Formato</th><th>Data</th><th>Ações</th></tr></thead><tbody>'+((data||[]).map(x=>'<tr><td><b>'+esc(x.tipo)+'</b></td><td>'+esc(x.metadados?.numero||x.documento_fiscal_id||"—")+'</td><td>'+esc(x.formato)+'</td><td>'+new Date(x.gerado_em).toLocaleString("pt-AO")+'</td><td class="actions"><button class="mini" onclick="openPdf(\''+x.documento_fiscal_id+'\')">Abrir PDF</button></td></tr>').join("")||'<tr><td colspan="5" class="empty">Ainda não existem PDFs gerados.</td></tr>')+'</tbody></table></div>';
+}
+async function openPdf(id){if(!id)return;const {data,error}=await sb.functions.invoke("gerar-documento-pdf",{body:{documento_fiscal_id:id}});if(error||!data?.signed_url){alert(error?.message||data?.error||"Não foi possível gerar o PDF.");return}window.open(data.signed_url,"_blank")}
+async function accounting(){$("content").innerHTML='<div class="grid"><div class="stat"><span class="muted">Documentos fiscais</span><b>Automático</b></div><div class="stat"><span class="muted">Recebimentos</span><b>Automático</b></div><div class="stat"><span class="muted">Livro Diário</span><b>Preparado</b></div><div class="stat"><span class="muted">SAF-T</span><b>Preparado</b></div></div><div class="panel"><h2>Contabilidade</h2><p class="muted">A faturação e os pagamentos serão ligados aos lançamentos contabilísticos e à exportação SAF-T na próxima camada operacional.</p></div>}
+boot();
 </script>
-</body>
-</html>
+</body></html>
