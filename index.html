@@ -11,7 +11,11 @@
 .app{min-height:100vh;display:grid;grid-template-columns:245px 1fr}.side{background:linear-gradient(180deg,#123B66 0%,#172B55 55%,#241B5E 100%);color:#fff;padding:22px 16px}.side .logo{margin-bottom:30px}.nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#d9e7f5;padding:13px;border-radius:10px;cursor:pointer;margin:4px 0}.nav button.active,.nav button:hover{background:#ffffff14;color:#fff}.logout{margin-top:30px;background:#ffffff12!important}.main{padding:28px;overflow:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:24px}.top h1{margin:0;font-size:28px}.pill{background:#fff;border:1px solid var(--line);padding:10px 13px;border-radius:999px;font-size:12px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 10px 28px #123B6614}.stat b{display:block;font-size:25px;margin-top:6px}.muted{color:var(--muted);font-size:12px}.panel{margin-top:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.panel h2{margin:0;font-size:18px}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:11px 8px;border-bottom:1px solid #edf1f5;text-align:left}.badge{padding:5px 8px;border-radius:999px;background:#E7F2FF;color:#1264D8;font-size:11px;font-weight:900}.actions{display:flex;gap:6px;flex-wrap:wrap}.mini{border:1px solid #dbe5ee;background:#fff;color:var(--navy);padding:7px 9px;border-radius:8px;font-size:11px;cursor:pointer}.empty{padding:30px;text-align:center;color:var(--muted)}
 @media(max-width:900px){.login{grid-template-columns:1fr}.brand{display:none}.app{grid-template-columns:1fr}.side{position:relative}.grid{grid-template-columns:repeat(2,1fr)}.main{padding:18px}}
 </style>
-<style id="vibrant-theme">.stat:nth-child(1){border-top:4px solid var(--blue)}.stat:nth-child(2){border-top:4px solid var(--violet)}.stat:nth-child(3){border-top:4px solid var(--green)}.stat:nth-child(4){border-top:4px solid var(--orange)}.nav button.active{background:linear-gradient(90deg,#1677FF33,#7B4DFF33);border-left:4px solid var(--yellow)}.panel-head h2{color:#123B66}.btn{box-shadow:0 8px 20px #1677FF30}.mini:hover{border-color:#1677FF;color:#1264D8;background:#F0F7FF}</style></head>
+<style id="vibrant-theme">.stat:nth-child(1){border-top:4px solid var(--blue)}.stat:nth-child(2){border-top:4px solid var(--violet)}.stat:nth-child(3){border-top:4px solid var(--green)}.stat:nth-child(4){border-top:4px solid var(--orange)}.nav button.active{background:linear-gradient(90deg,#1677FF33,#7B4DFF33);border-left:4px solid var(--yellow)}.panel-head h2{color:#123B66}.btn{box-shadow:0 8px 20px #1677FF30}.mini:hover{border-color:#1677FF;color:#1264D8;background:#F0F7FF}</style>
+<style id="data-persistence-theme">
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.upload-box{border:2px dashed #9CC7FF;border-radius:16px;padding:18px;background:#F5FAFF;text-align:center}.upload-box input{border:0;background:transparent}.preview-logo{width:78px;height:78px;border-radius:16px;object-fit:contain;background:#fff;border:1px solid #D8E5F2;margin:8px auto;display:block}.saved{color:#087A4B;font-weight:800}.danger{color:#C62828}@media(max-width:700px){.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
 <body>
 <section id="loginView" class="login">
  <div class="brand"><div class="logo"><div class="mark">NT</div>NOVA TODDLE SCHOOL</div><div class="hero"><small>EDUCAÇÃO • GESTÃO • FAMÍLIA</small><h1>Um novo espaço para aprender e crescer.</h1><p>Gestão académica, financeira e documental numa única plataforma.</p></div><div class="features"><div class="feature"><b>Famílias</b><span>Acompanhamento escolar</span></div><div class="feature"><b>Professores</b><span>Turmas e avaliações</span></div><div class="feature"><b>Gestão</b><span>Faturação e contabilidade</span></div></div></div>
@@ -80,5 +84,35 @@ async function downloadPdf(id){try{const u=await getPdf(id);const a=document.cre
 async function printPdf(id){try{const w=window.open(await getPdf(id),"_blank");if(w)w.addEventListener("load",()=>w.print())}catch(e){alert(e.message)}}
 async function accounting(){$("content").innerHTML='<div class="grid"><div class="stat"><span class="muted">Documentos fiscais</span><b>Automático</b></div><div class="stat"><span class="muted">Recebimentos</span><b>Automático</b></div><div class="stat"><span class="muted">Livro Diário</span><b>Preparado</b></div><div class="stat"><span class="muted">SAF-T</span><b>Preparado</b></div></div><div class="panel"><h2>Contabilidade</h2><p class="muted">A faturação e os pagamentos serão ligados aos lançamentos contabilísticos e à exportação SAF-T na próxima camada operacional.</p></div>}
 <div id="newDocModal" class="hidden" style="position:fixed;inset:0;background:#102a4388;z-index:50;padding:20px;overflow:auto"><div style="max-width:1100px;margin:20px auto;background:#fff;border-radius:22px;padding:24px;box-shadow:0 25px 80px #102a4340"><div class="panel-head"><h2>Novo Documento Fiscal</h2><button class="mini" onclick="closeNewDoc()">Fechar</button></div><form onsubmit="submitNewDoc(event)"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px"><div><label>Tipo</label><select id="docType" style="width:100%;padding:12px;border:1px solid #dce5ee;border-radius:13px"><option value="fatura">Fatura</option><option value="fatura_recibo">Fatura-Recibo</option><option value="recibo">Recibo</option><option value="proforma">Proforma</option><option value="nota_credito">Nota de Crédito</option><option value="nota_debito">Nota de Débito</option></select></div><div><label>Série fiscal</label><select id="docSeries" required style="width:100%;padding:12px;border:1px solid #dce5ee;border-radius:13px"></select></div><div><label>Data de emissão</label><input id="docDate" type="date" required></div><div><label>Aluno</label><select id="docAluno" onchange="selectAluno()" style="width:100%;padding:12px;border:1px solid #dce5ee;border-radius:13px"><option value="">Selecionar aluno…</option></select></div><div><label>Cliente / Encarregado</label><input id="docClient" required placeholder="Nome do encarregado"></div><div><label>NIF</label><input id="docNif" placeholder="NIF"></div><div><label>Cobrança escolar</label><select id="docCobranca" onchange="selectCobranca()" style="width:100%;padding:12px;border:1px solid #dce5ee;border-radius:13px"><option value="">Selecionar cobrança…</option></select></div><div><label>Vencimento</label><input id="docDue" type="date"></div><div><label>E-mail</label><input id="docEmail" type="email"></div><div><label>Telefone</label><input id="docPhone"></div></div><div class="panel" style="margin-top:15px"><div class="panel-head"><h2>Linhas</h2><button type="button" class="mini" onclick="addDocLine()">+ Adicionar linha</button></div><div id="docLines"></div></div><div style="margin-top:15px;display:flex;justify-content:flex-end"><div style="min-width:290px;background:#f5f8fc;border-radius:14px;padding:15px"><div>Subtotal: <b style="float:right" id="docSubtotal">0,00 AOA</b></div><div>Desconto: <b style="float:right" id="docDiscount">0,00 AOA</b></div><div>Imposto: <b style="float:right" id="docTax">0,00 AOA</b></div><hr><div style="font-size:18px">Total: <b style="float:right" id="docTotal">0,00 AOA</b></div></div></div><button id="emitBtn" class="btn full" type="submit">Emitir e gerar PDF</button></form></div></div>\nboot();
+</script>
+<script id="persistence-layer">
+async function uploadSchoolAsset(file,kind){
+ if(!file||!profile?.instituicao_id) throw new Error("Selecione uma escola e inicie sessão.");
+ const safe=file.name.toLowerCase().replace(/[^a-z0-9._-]/g,"-");
+ const path=profile.instituicao_id+"/"+kind+"/"+Date.now()+"-"+safe;
+ const {error}=await sb.storage.from("escola-assets").upload(path,file,{upsert:false,contentType:file.type});
+ if(error) throw error;
+ const {data}=sb.storage.from("escola-assets").getPublicUrl(path);
+ return {path,url:data.publicUrl};
+}
+async function saveSchoolProfile(form){
+ const data=Object.fromEntries(new FormData(form).entries());
+ let logo_url=null;
+ const file=form.querySelector('[name="logo"]')?.files?.[0];
+ if(file){const up=await uploadSchoolAsset(file,"logos");logo_url=up.url;}
+ const payload={nome:data.nome,nome_curto:data.nome_curto||null,nif:data.nif||null,email:data.email||null,telefone:data.telefone||null,cidade:data.cidade||null,website:data.website||null,logo_url:logo_url||data.logo_url||null};
+ const {error}=await sb.from("instituicao").update(payload).eq("id",profile.instituicao_id);
+ if(error) throw error;
+ return payload;
+}
+async function saveCadastro(table,payload,file,photoField="foto_url"){
+ let url=null;
+ if(file){const up=await uploadSchoolAsset(file,"fotos");url=up.url;}
+ if(url) payload[photoField]=url;
+ payload.instituicao_id=profile.instituicao_id;
+ const {data,error}=await sb.from(table).insert(payload).select().single();
+ if(error) throw error;
+ return data;
+}
 </script>
 </body></html>
