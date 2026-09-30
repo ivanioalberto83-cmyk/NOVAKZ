@@ -22,7 +22,7 @@
  <div class="login-wrap"><div class="card"><div class="logo" style="color:#102a43;margin-bottom:24px"><div class="mark">NT</div>NOVA TODDLE SCHOOL</div><small style="color:#2f80ed;font-weight:900">ÁREA RESERVADA</small><h2>Entrar na plataforma</h2><p class="muted">Aceda ao seu espaço de aprendizagem e gestão.</p><form id="loginForm"><label>E-mail</label><input id="email" type="email" required placeholder="seu@email.com"><label>Palavra-passe</label><input id="password" type="password" required placeholder="••••••••"><button class="btn full">Entrar no NOVA TODDLE SCHOOL</button></form><div id="loginStatus" class="status hidden"></div></div></div>
 </section>
 <section id="appView" class="app hidden">
- <aside class="side"><div class="logo"><div class="mark">NT</div><span>NOVA TODDLE</span></div><nav class="nav"><button data-page="inicio" class="active">⌂ Visão geral</button><button data-page="financeiro">€ Financeiro</button><button data-page="documentos">▣ Documentos</button><button data-page="contabilidade">▤ Contabilidade</button><button data-page="cadastros">✚ Cadastros</button><button data-page="alunos">👥 Alunos</button></nav><button id="logout" class="nav logout">↪ Terminar sessão</button></aside>
+ <aside class="side"><div class="logo"><div class="mark">NT</div><span>NOVA TODDLE</span></div><nav class="nav"><button data-page="inicio" class="active">⌂ Visão geral</button><button data-page="financeiro">€ Financeiro</button><button data-page="documentos">▣ Documentos</button><button data-page="contabilidade">▤ Contabilidade</button><button data-page="cadastros">✚ Cadastros</button><button data-page="academico">🎓 Académico</button><button data-page="operacoes">🏢 Operações</button><button data-page="rh">🧑‍💼 RH</button><button data-page="recursos">📚 Recursos</button><button data-page="comunicacao">📢 Comunicação</button><button data-page="administracao">⚙ Administração</button><button data-page="alunos">👥 Alunos</button></nav><button id="logout" class="nav logout">↪ Terminar sessão</button></aside>
  <main class="main"><div class="top"><div><h1 id="pageTitle">Visão geral</h1><span id="userInfo" class="muted"></span></div><span class="pill">NOVA TODDLE SCHOOL</span></div><div id="content"></div></main>
 </section>
 <script>
@@ -46,8 +46,8 @@ $("logout").onclick=async()=>{await sb.auth.signOut();showLogin()};
 document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>render(b.dataset.page));
 async function render(page){
  document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
- const titles={inicio:"Visão geral",financeiro:"Financeiro",documentos:"Documentos",contabilidade:"Contabilidade",cadastros:"Centro de Cadastros",alunos:"Alunos"};$("pageTitle").textContent=titles[page]||page;
- if(page==="inicio")return overview(); if(page==="financeiro")return finance(); if(page==="documentos")return docs(); if(page==="contabilidade")return accounting(); if(page==="cadastros")return cadastros(); if(page==="alunos")return alunos(); $("content").innerHTML='<div class="panel"><h2>Alunos</h2></div>';
+ const titles={inicio:"Visão geral",financeiro:"Financeiro",documentos:"Documentos",contabilidade:"Contabilidade",cadastros:"Centro de Cadastros",academico:"Módulo Académico",operacoes:"Operações da Escola",rh:"Recursos Humanos",recursos:"Recursos e Serviços",comunicacao:"Comunicação",administracao:"Administração",alunos:"Alunos"};$("pageTitle").textContent=titles[page]||page;
+ if(page==="inicio")return overview(); if(page==="financeiro")return finance(); if(page==="documentos")return docs(); if(page==="contabilidade")return accounting(); if(page==="cadastros")return cadastros(); if(page==="academico")return moduloAcademico(); if(page==="operacoes")return moduloOperacoes(); if(page==="rh")return moduloRH(); if(page==="recursos")return moduloRecursos(); if(page==="comunicacao")return moduloComunicacao(); if(page==="administracao")return moduloAdministracao(); if(page==="alunos")return alunos(); $("content").innerHTML='<div class="panel"><h2>Alunos</h2></div>';
 }
 async function overview(){
  const [c,p,d]=await Promise.all([sb.from("cobrancas_escolares").select("id,valor,estado",{count:"exact"}),sb.from("pagamentos_escolares").select("id,valor",{count:"exact"}),sb.from("documentos_fiscais").select("id,total,estado",{count:"exact"})]);
@@ -141,6 +141,117 @@ async function saveCadastro(table,payload,file,photoField="foto_url"){
  const {data,error}=await sb.from(table).insert(payload).select().single();
  if(error) throw error;
  return data;
+}
+</script>
+
+<script id="nova-modules-layer">
+const MODULOS={
+ academico:[
+  ["Alunos","alunos","👨‍🎓","Cadastro, ficha, estado e fotografia dos alunos."],
+  ["Encarregados","encarregados","👨‍👩‍👧","Responsáveis, contactos e relação com alunos."],
+  ["Professores","professores","👨‍🏫","Docentes, perfil profissional e especialização."],
+  ["Turmas","turmas","🏫","Turmas, salas e ano letivo."],
+  ["Anos letivos","anos_letivos","📅","Períodos escolares e ano atual."],
+  ["Disciplinas","disciplinas","📚","Disciplinas curriculares."],
+  ["Matrículas","matriculas","📝","Inscrições e vínculo do aluno à turma."],
+  ["Presenças","presencas","✅","Presença e faltas dos alunos."],
+  ["Avaliações","avaliacoes","📊","Avaliações e instrumentos de avaliação."],
+  ["Resultados","resultados","🏆","Resultados académicos."],
+  ["Horários","horarios","🕐","Horários escolares."],
+  ["Currículos","curriculos","🧭","Currículos e organização pedagógica."],
+  ["Progresso","progresso_aluno","📈","Acompanhamento do progresso individual."],
+  ["Histórico escolar","historico_alunos","🗂️","Percurso histórico do aluno."]
+ ],
+ operacoes:[
+  ["Biblioteca","biblioteca_livros","📖","Livros, exemplares e catálogo."],
+  ["Empréstimos","biblioteca_emprestimos","🔄","Empréstimos e devoluções."],
+  ["Transportes","transportes_veiculos","🚌","Veículos escolares."],
+  ["Rotas","transportes_rotas","🛣️","Rotas de transporte."],
+  ["Alunos no transporte","transportes_alunos","🎒","Alunos associados às rotas."],
+  ["Cantina","cantina_cardapios","🍽️","Cardápios e alimentação."],
+  ["Consumos","cantina_consumos","🥗","Consumos dos alunos."],
+  ["Salas e instalações","instalacoes_salas","🏢","Salas e espaços."],
+  ["Reservas","instalacoes_reservas","📆","Reservas de espaços."],
+  ["Portaria","portaria_visitantes","🛡️","Visitantes e controlo de acesso."],
+  ["Ocorrências","portaria_ocorrencias","🚨","Ocorrências da portaria."],
+  ["Inventário","inventario_itens","📦","Património e bens da escola."],
+  ["Movimentos de inventário","inventario_movimentos","↔️","Entradas, saídas e movimentos."]
+ ],
+ rh:[
+  ["Funcionários","rh_funcionarios","👥","Cadastro de colaboradores."],
+  ["Férias","rh_ferias","🌴","Férias e ausências."],
+  ["Documentos RH","rh_documentos","📄","Documentação dos colaboradores."]
+ ],
+ recursos:[
+  ["Compras","compras_pedidos","🛒","Pedidos de compra."],
+  ["Fornecedores","compras_fornecedores","🏪","Cadastro de fornecedores."],
+  ["Atividades e clubes","atividades_clubes","🎯","Atividades extracurriculares."],
+  ["Inscrições","atividades_inscricoes","🎟️","Inscrições em atividades."],
+  ["Saúde escolar","saude_registos","🏥","Registos de saúde."],
+  ["Alergias","saude_alergias","⚕️","Alergias e informação clínica escolar."],
+  ["LMS / Cursos","lms_cursos","💻","Cursos digitais."],
+  ["Conteúdos LMS","lms_conteudos","🎬","Conteúdos de aprendizagem."],
+  ["Inscrições LMS","lms_inscricoes","🧑‍💻","Inscrições e progresso."]
+ ],
+ comunicacao:[
+  ["Comunicados","comunicados","📣","Comunicação institucional."],
+  ["Eventos","eventos","🗓️","Calendário de eventos."],
+  ["Mensagens","mensagens","💬","Mensagens da plataforma."],
+  ["Conversas","mensagens_conversas","🗨️","Conversas entre utilizadores."],
+  ["Notificações","notificacoes","🔔","Notificações."],
+  ["Nova IA","ai_assistants","🤖","Assistentes de IA."],
+  ["Conhecimento IA","ai_conhecimento","🧠","Base de conhecimento da IA."]
+ ],
+ administracao:[
+  ["Perfis e utilizadores","perfis","👤","Perfis, funções e acesso."],
+  ["Auditoria","auditoria","🔎","Registo das operações."],
+  ["Configuração fiscal","configuracoes_fiscais","🇦🇴","Configuração fiscal da escola."],
+  ["Séries fiscais","series_fiscais","🔢","Séries e numeração fiscal."],
+  ["Documentos fiscais","documentos_fiscais","🧾","Documentos fiscais emitidos."],
+  ["AGT","agt_submissoes","🇦🇴","Submissões e estado perante AGT."],
+  ["SAF-T","saft_exportacoes","📤","Exportações SAF-T."],
+  ["Contas bancárias","contas_bancarias","🏦","Contas bancárias da escola."],
+  ["Plano de contas","plano_contas_contabil","📒","Plano contabilístico."],
+  ["Períodos contabilísticos","periodos_contabeis","📅","Períodos contabilísticos."]
+ ]
+};
+function moduloCards(grupo){
+ const arr=MODULOS[grupo]||[];
+ return '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">'+arr.map((m,i)=>'<button class="panel" style="text-align:left;cursor:pointer;border:1px solid var(--line)" onclick="abrirModulo(\''+m[1]+'\')"><div style="font-size:30px">'+m[2]+'</div><h2 style="margin:8px 0">'+esc(m[0])+'</h2><p class="muted">'+esc(m[3])+'</p><span id="count-'+m[1]+'" class="badge">consultar…</span></button>').join('')+'</div>';
+}
+async function preencherContagens(grupo){
+ const arr=MODULOS[grupo]||[];
+ await Promise.all(arr.map(async m=>{
+   try{
+    let q=sb.from(m[1]).select("id",{count:"exact",head:true});
+    if(profile?.instituicao_id && ["perfis","alunos","encarregados","turmas","anos_letivos","curriculos","biblioteca_livros","biblioteca_emprestimos","candidatos_admissao","cantina_cardapios","cantina_consumos","certificados_escolares","comportamento_registos","compras_fornecedores","compras_pedidos","comunicados","configuracoes_fiscais","contabilizacoes_fiscais","contas_bancarias","documentos_escolares","documentos_fiscais","eventos","exportacoes","fiscal_auditoria","historico_alunos","instalacoes_reservas","instalacoes_salas","inventario_itens","inventario_movimentos","lancamentos_contabeis","lms_cursos","lms_conteudos","lms_inscricoes","metodos_pagamento","pagamentos_escolares","pagamentos_fiscais","periodos_contabeis","plano_contas_contabil","portaria_ocorrencias","portaria_visitantes","rh_documentos","rh_ferias","rh_funcionarios","saft_exportacoes","saude_alergias","saude_registos","series_fiscais","sos_acoes","sos_alertas","sos_denuncias","sos_historico","transportes_alunos","transportes_rotas","transportes_veiculos","atividades_clubes","atividades_inscricoes","agt_submissoes","ai_assistants","ai_conhecimento"].includes(m[1])) q=q.eq("instituicao_id",profile.instituicao_id);
+    const r=await q;const el=$("count-"+m[1]);if(el)el.textContent=(r.count??0)+" registos";
+   }catch(e){const el=$("count-"+m[1]);if(el)el.textContent="indisponível"}
+ }));
+}
+async function moduloAcademico(){$("content").innerHTML='<div class="panel"><div class="panel-head"><h2>🎓 Módulo Académico</h2><span class="badge">Ligado ao Supabase</span></div><p class="muted">Gestão pedagógica completa. Cada módulo abaixo usa as tabelas académicas existentes.</p></div>'+moduloCards("academico");preencherContagens("academico")}
+async function moduloOperacoes(){$("content").innerHTML='<div class="panel"><div class="panel-head"><h2>🏢 Operações da Escola</h2></div><p class="muted">Biblioteca, transportes, cantina, instalações, portaria e inventário.</p></div>'+moduloCards("operacoes");preencherContagens("operacoes")}
+async function moduloRH(){ $("content").innerHTML='<div class="panel"><div class="panel-head"><h2>🧑‍💼 Recursos Humanos</h2></div><p class="muted">Funcionários, férias e documentos de RH.</p></div>'+moduloCards("rh");preencherContagens("rh")}
+async function moduloRecursos(){ $("content").innerHTML='<div class="panel"><div class="panel-head"><h2>📚 Recursos e Serviços</h2></div><p class="muted">Compras, fornecedores, atividades, saúde e aprendizagem digital.</p></div>'+moduloCards("recursos");preencherContagens("recursos")}
+async function moduloComunicacao(){ $("content").innerHTML='<div class="panel"><div class="panel-head"><h2>📢 Comunicação e IA</h2></div><p class="muted">Comunicados, eventos, mensagens, notificações e assistentes.</p></div>'+moduloCards("comunicacao");preencherContagens("comunicacao")}
+async function moduloAdministracao(){ $("content").innerHTML='<div class="panel"><div class="panel-head"><h2>⚙ Administração</h2></div><p class="muted">Utilizadores, auditoria, fiscalidade, AGT, SAF-T e contabilidade.</p></div>'+moduloCards("administracao");preencherContagens("administracao")}
+async function abrirModulo(table){
+ const labels={alunos:"Alunos",encarregados:"Encarregados",professores:"Professores",turmas:"Turmas",disciplinas:"Disciplinas",matriculas:"Matrículas",presencas:"Presenças",avaliacoes:"Avaliações",resultados:"Resultados",horarios:"Horários",curriculos:"Currículos",progresso_aluno:"Progresso",historico_alunos:"Histórico escolar",biblioteca_livros:"Biblioteca",biblioteca_emprestimos:"Empréstimos",transportes_veiculos:"Transportes",transportes_rotas:"Rotas",cantina_cardapios:"Cantina",instalacoes_salas:"Instalações",inventario_itens:"Inventário",rh_funcionarios:"Funcionários",rh_ferias:"Férias",rh_documentos:"Documentos RH",compras_pedidos:"Compras",compras_fornecedores:"Fornecedores",comunicados:"Comunicados",eventos:"Eventos",mensagens:"Mensagens",notificacoes:"Notificações",perfis:"Perfis",auditoria:"Auditoria",documentos_fiscais:"Documentos fiscais",saft_exportacoes:"SAF-T",agt_submissoes:"AGT",plano_contas_contabil:"Plano de contas",periodos_contabeis:"Períodos contabilísticos",contas_bancarias:"Contas bancárias"};
+ const title=labels[table]||table;
+ $("pageTitle").textContent=title;
+ $("content").innerHTML='<div class="panel"><div class="panel-head"><h2>'+esc(title)+'</h2><div class="actions"><button class="mini" onclick="history.back()">Voltar</button><button class="mini" onclick="abrirModulo(\''+table+'\')">↻ Atualizar</button></div></div><div id="moduleTableState" class="muted">A carregar dados reais do Supabase…</div><div style="overflow:auto;margin-top:12px"><table class="table" id="genericModuleTable"></table></div></div>';
+ try{
+  let q=sb.from(table).select("*").limit(100);
+  if(profile?.instituicao_id){
+    const meta=["alunos","encarregados","turmas","anos_letivos","curriculos","biblioteca_livros","biblioteca_emprestimos","candidatos_admissao","cantina_cardapios","cantina_consumos","certificados_escolares","comportamento_registos","compras_fornecedores","compras_pedidos","comunicados","configuracoes_fiscais","contabilizacoes_fiscais","contas_bancarias","documentos_escolares","documentos_fiscais","eventos","exportacoes","fiscal_auditoria","historico_alunos","instalacoes_reservas","instalacoes_salas","inventario_itens","inventario_movimentos","lancamentos_contabeis","lms_cursos","lms_conteudos","lms_inscricoes","metodos_pagamento","pagamentos_escolares","pagamentos_fiscais","periodos_contabeis","plano_contas_contabil","portaria_ocorrencias","portaria_visitantes","rh_documentos","rh_ferias","rh_funcionarios","saft_exportacoes","saude_alergias","saude_registos","series_fiscais","transportes_alunos","transportes_rotas","transportes_veiculos","atividades_clubes","atividades_inscricoes","agt_submissoes","ai_assistants","ai_conhecimento"];
+    if(meta.includes(table)) q=q.eq("instituicao_id",profile.instituicao_id);
+  }
+  const {data,error}=await q;
+  if(error) throw error;
+  const rows=data||[];const cols=[...new Set(rows.flatMap(r=>Object.keys(r)))].slice(0,10);
+  $("moduleTableState").textContent=rows.length+" registo(s) encontrados. Visualização operacional ativa.";
+  $("genericModuleTable").innerHTML='<thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+cols.map(c=>'<td>'+esc(typeof r[c]==="object"?JSON.stringify(r[c]):r[c])+'</td>').join('')+'</tr>').join('')+'</tbody>';
+ }catch(e){$("moduleTableState").innerHTML='<span class="danger">Não foi possível consultar este módulo: '+esc(e.message)+'</span>'}
 }
 </script>
 </body></html>
