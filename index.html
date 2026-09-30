@@ -113,7 +113,8 @@ async function uploadSchoolAsset(file,kind){
  if(!file||!profile?.instituicao_id) throw new Error("Selecione uma escola e inicie sessão.");
  const safe=file.name.toLowerCase().replace(/[^a-z0-9._-]/g,"-");
  const path=profile.instituicao_id+"/"+kind+"/"+Date.now()+"-"+safe;
- const {error}=await sb.storage.from("escola-assets").upload(path,file,{upsert:false,contentType:file.type});
+ const bucket="school-logos";
+ const {error}=await sb.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type});
  if(error) throw error;
  const {data}=sb.storage.from(bucket).getPublicUrl(path);
  return {path,url:data.publicUrl};
