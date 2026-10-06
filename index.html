@@ -19,7 +19,7 @@
 <body>
 <section id="loginView" class="login">
  <div class="brand"><div class="logo"><div class="mark">NT</div>NOVA TODDLE SCHOOL</div><div class="hero"><small>EDUCAÇÃO • GESTÃO • FAMÍLIA</small><h1>Um novo espaço para aprender e crescer.</h1><p>Gestão académica, financeira e documental numa única plataforma.</p></div><div class="features"><div class="feature"><b>Famílias</b><span>Acompanhamento escolar</span></div><div class="feature"><b>Professores</b><span>Turmas e avaliações</span></div><div class="feature"><b>Gestão</b><span>Faturação e contabilidade</span></div></div></div>
- <div class="login-wrap"><div class="card"><div class="logo" style="color:#102a43;margin-bottom:24px"><div class="mark">NT</div>NOVA TODDLE SCHOOL</div><small style="color:#2f80ed;font-weight:900">ÁREA RESERVADA</small><h2>Entrar na plataforma</h2><p class="muted">Aceda ao seu espaço de aprendizagem e gestão.</p><form id="loginForm"><label>E-mail</label><input id="email" type="email" required placeholder="seu@email.com"><label>Palavra-passe</label><input id="password" type="password" required placeholder="••••••••"><button class="btn full">Entrar no NOVA TODDLE SCHOOL</button></form><div id="loginStatus" class="status hidden"></div></div></div>
+ <div class="login-wrap"><div class="card"><div class="logo" style="color:#102a43;margin-bottom:24px"><div class="mark">NT</div>NOVA TODDLE SCHOOL</div><small style="color:#2f80ed;font-weight:900">ÁREA RESERVADA</small><h2>Entrar na plataforma</h2><p class="muted">Aceda ao seu espaço de aprendizagem e gestão.</p><form id="loginForm"><label>E-mail</label><input id="email" type="email" required placeholder="seu@email.com"><label>Palavra-passe</label><input id="password" type="password" required placeholder="••••••••"><button class="btn full">Entrar no NOVA TODDLE SCHOOL</button></form><div id="loginStatus" class="status hidden"></div><div class="public-entry"><button type="button" class="public-btn" onclick="openPublicFormation()">🎓 Ver Cursos Online</button><button type="button" class="public-btn" onclick="openPublicFormation();setTimeout(()=>document.getElementById("publicCentreGrid")?.scrollIntoView({behavior:"smooth"}),150)">✓ Encontrar Centros Verificados</button></div></div></div>
 </section>
 <section id="appView" class="app hidden">
  <aside class="side"><div class="logo"><div class="mark">NT</div><span>NOVA TODDLE</span></div><nav class="nav"><button data-page="inicio" class="active">⌂ Visão geral</button><button data-page="financeiro">€ Financeiro</button><button data-page="documentos">▣ Documentos</button><button data-page="contabilidade">▤ Contabilidade</button><button data-page="cadastros">✚ Cadastros</button><button data-page="academico">🎓 Académico</button><button data-page="operacoes">🏢 Operações</button><button data-page="rh">🧑‍💼 RH</button><button data-page="recursos">📚 Recursos</button><button data-page="formacao">🎓 Cursos & Formação</button><button data-page="comunicacao">📢 Comunicação</button><button data-page="administracao">⚙ Administração</button><button data-page="alunos">👥 Alunos</button></nav><button id="logout" class="nav logout">↪ Terminar sessão</button></aside>
@@ -465,4 +465,61 @@ async function abrirModulo(table){
  }catch(e){$("moduleTableState").innerHTML='<span class="danger">Não foi possível consultar este módulo: '+esc(e.message)+'</span>'}
 }
 </script>
+
+<style id="nova-public-formacao-style">
+.public-entry{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.public-btn{border:1px solid #cfe1f5;background:#fff;color:#123B66;padding:10px 13px;border-radius:12px;font-weight:800;cursor:pointer}
+.public-btn:hover{border-color:#1677FF;background:#F0F7FF}
+.public-modal{position:fixed;inset:0;background:#102a438c;z-index:100;padding:18px;overflow:auto}
+.public-modal-card{max-width:1180px;margin:20px auto;background:#fff;border-radius:24px;padding:24px;box-shadow:0 25px 80px #102a4340}
+.public-catalog-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.public-course,.public-centre{border:1px solid #dce7f2;border-radius:18px;padding:17px;background:#fff}
+.public-course h3,.public-centre h3{margin:0 0 8px;color:#123B66}
+.public-course .meta,.public-centre .meta{font-size:12px;color:#5F7187;line-height:1.55}
+.public-toolbar{display:grid;grid-template-columns:1.7fr 1fr auto;gap:10px;margin:15px 0}
+.public-toolbar input,.public-toolbar select{width:100%;padding:12px;border:1px solid #dce5ee;border-radius:12px}
+.public-section{margin-top:22px}
+@media(max-width:900px){.public-catalog-grid{grid-template-columns:1fr 1fr}.public-toolbar{grid-template-columns:1fr}}
+@media(max-width:600px){.public-catalog-grid{grid-template-columns:1fr}}
+</style>
+<div id="publicFormationModal" class="public-modal hidden">
+ <div class="public-modal-card">
+  <div class="panel-head">
+   <div><h2 style="margin:0">Cursos Online & Centros Verificados</h2><span class="muted">NOVA TODDLE SCHOOL • Plataforma de intermediação de formação</span></div>
+   <button class="mini" onclick="closePublicFormation()">Fechar</button>
+  </div>
+  <div class="public-toolbar">
+   <input id="publicCourseSearch" placeholder="Pesquisar curso, área ou palavra-chave…" oninput="filterPublicCourses()">
+   <select id="publicCourseModality" onchange="filterPublicCourses()">
+    <option value="">Todas as modalidades</option><option value="ONLINE">Online</option><option value="PRESENCIAL">Presencial</option><option value="HIBRIDA">Híbrida</option>
+   </select>
+   <button class="mini" onclick="loadPublicFormation()">Atualizar</button>
+  </div>
+  <div class="public-section"><div class="panel-head"><h2>Cursos publicados</h2><span id="publicCourseCount" class="badge">0</span></div><div id="publicCourseGrid" class="public-catalog-grid"><div class="empty">A carregar…</div></div></div>
+  <div class="public-section"><div class="panel-head"><h2>Centros Verificados</h2><span id="publicCentreCount" class="badge">0</span></div><div id="publicCentreGrid" class="public-catalog-grid"><div class="empty">A carregar…</div></div></div>
+ </div>
+</div>
+<script id="nova-public-formacao">
+let publicCourses=[];
+function openPublicFormation(){$("publicFormationModal").classList.remove("hidden");loadPublicFormation()}
+function closePublicFormation(){$("publicFormationModal").classList.add("hidden")}
+async function loadPublicFormation(){
+ const cg=$("publicCourseGrid"),eg=$("publicCentreGrid"); if(cg)cg.innerHTML='<div class="empty">A carregar cursos…</div>'; if(eg)eg.innerHTML='<div class="empty">A carregar centros…</div>';
+ const [cr,er]=await Promise.all([
+  sb.from("formacao_cursos").select("id,nome,descricao,curso_tipo,estado_acreditacao,numero_acreditacao,nivel_cnqp,entidade_certificadora,carga_horaria,modalidade,preco,moeda,nivel,imagem_url,objetivos,pre_requisitos,destaque,slug").eq("ativo",true).eq("publicado",true).order("destaque",{ascending:false}).order("nome"),
+  sb.from("entidades_formadoras").select("id,nome,tipo_entidade,estado_licenciamento,numero_licenca,estado_acreditacao,numero_acreditacao,verificado,provincia,municipio,website,descricao,logotipo_url").eq("ativo",true).eq("verificado",true).order("nome")
+ ]);
+ if(cr.error){if(cg)cg.innerHTML='<div class="empty">'+esc(cr.error.message)+'</div>'}else{publicCourses=cr.data||[];renderPublicCourses(publicCourses)}
+ if(er.error){if(eg)eg.innerHTML='<div class="empty">'+esc(er.error.message)+'</div>'}else{const rows=er.data||[];if($("publicCentreCount"))$("publicCentreCount").textContent=rows.length;eg.innerHTML=rows.length?rows.map(c=>'<div class="public-centre"><h3>'+esc(c.nome)+' '+(c.verificado?'✓':'')+'</h3><div class="meta">'+esc(c.tipo_entidade||'Centro de formação')+'<br>'+esc([c.municipio,c.provincia].filter(Boolean).join(' • ')||'Localização não indicada')+'<br>Licenciamento: '+esc(c.estado_licenciamento||'—')+' • Acreditação: '+esc(c.estado_acreditacao||'—')+(c.numero_acreditacao?' • Nº '+esc(c.numero_acreditacao):'')+'</div>'+(c.website?'<p><a href="'+esc(c.website)+'" target="_blank" rel="noopener">Website do centro</a></p>':'')+'</div>').join(''):'<div class="empty">Ainda não existem centros verificados publicados.</div>'}
+}
+function renderPublicCourses(rows){
+ if($("publicCourseCount"))$("publicCourseCount").textContent=rows.length;
+ const box=$("publicCourseGrid");if(!box)return;
+ box.innerHTML=rows.length?rows.map(c=>'<div class="public-course">'+(c.imagem_url?'<img src="'+esc(c.imagem_url)+'" alt="" style="width:100%;height:145px;object-fit:cover;border-radius:13px;margin-bottom:12px">':'')+'<h3>'+esc(c.nome)+(c.destaque?' ★':'')+'</h3><div class="meta">'+esc(c.modalidade||'Modalidade não indicada')+' • '+esc(c.carga_horaria?c.carga_horaria+' h':'Carga não indicada')+'<br>'+esc(c.nivel||c.nivel_cnqp||'Nível não indicado')+' • '+esc(c.curso_tipo||'Formação')+'<br>'+(c.preco!=null?Number(c.preco).toLocaleString("pt-AO",{minimumFractionDigits:2})+' '+esc(c.moeda||'AOA'):'Preço sob consulta')+(c.entidade_certificadora?' • Certificação: '+esc(c.entidade_certificadora):'')+'</div><p class="muted">'+esc((c.descricao||c.objetivos||'').slice(0,180))+'</p><button class="mini" onclick="publicCourseDetails(\''+c.id+'\')">Ver curso</button><button class="mini" onclick="publicCourseApply(\''+c.id+'\')">Inscrever-me</button></div>').join(''):'<div class="empty">Nenhum curso publicado corresponde aos filtros.</div>'
+}
+function filterPublicCourses(){const q=($("publicCourseSearch")?.value||"").toLowerCase().trim(),m=$("publicCourseModality")?.value||"";renderPublicCourses(publicCourses.filter(c=>(!q||[c.nome,c.descricao,c.curso_tipo,c.nivel,c.objetivos].filter(Boolean).join(" ").toLowerCase().includes(q))&&(!m||String(c.modalidade||"").toUpperCase()===m)))}
+function publicCourseDetails(id){const c=publicCourses.find(x=>x.id===id);if(!c)return;alert(c.nome+"\n\n"+(c.descricao||"Sem descrição.")+"\n\nPré-requisitos: "+(c.pre_requisitos||"Não indicados")+"\n\nAvaliação/certificação disponível após inscrição e conclusão segundo as regras da entidade formadora.")}
+function publicCourseApply(id){const c=publicCourses.find(x=>x.id===id);if(!c)return;alert("Curso: "+c.nome+"\n\nPara concluir a matrícula, entre na sua conta do NOVA TODDLE SCHOOL. A inscrição pública não cria diretamente um formando nem confirma matrícula sem autenticação e validação.");}
+</script>
+
 </body></html>
