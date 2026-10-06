@@ -22,7 +22,7 @@
  <div class="login-wrap"><div class="card"><div class="logo" style="color:#102a43;margin-bottom:24px"><div class="mark">NT</div>NOVA TODDLE SCHOOL</div><small style="color:#2f80ed;font-weight:900">ÁREA RESERVADA</small><h2>Entrar na plataforma</h2><p class="muted">Aceda ao seu espaço de aprendizagem e gestão.</p><form id="loginForm"><label>E-mail</label><input id="email" type="email" required placeholder="seu@email.com"><label>Palavra-passe</label><input id="password" type="password" required placeholder="••••••••"><button class="btn full">Entrar no NOVA TODDLE SCHOOL</button></form><div id="loginStatus" class="status hidden"></div></div></div>
 </section>
 <section id="appView" class="app hidden">
- <aside class="side"><div class="logo"><div class="mark">NT</div><span>NOVA TODDLE</span></div><nav class="nav"><button data-page="inicio" class="active">⌂ Visão geral</button><button data-page="financeiro">€ Financeiro</button><button data-page="documentos">▣ Documentos</button><button data-page="contabilidade">▤ Contabilidade</button><button data-page="cadastros">✚ Cadastros</button><button data-page="academico">🎓 Académico</button><button data-page="operacoes">🏢 Operações</button><button data-page="rh">🧑‍💼 RH</button><button data-page="recursos">📚 Recursos</button><button data-page="comunicacao">📢 Comunicação</button><button data-page="administracao">⚙ Administração</button><button data-page="alunos">👥 Alunos</button></nav><button id="logout" class="nav logout">↪ Terminar sessão</button></aside>
+ <aside class="side"><div class="logo"><div class="mark">NT</div><span>NOVA TODDLE</span></div><nav class="nav"><button data-page="inicio" class="active">⌂ Visão geral</button><button data-page="financeiro">€ Financeiro</button><button data-page="documentos">▣ Documentos</button><button data-page="contabilidade">▤ Contabilidade</button><button data-page="cadastros">✚ Cadastros</button><button data-page="academico">🎓 Académico</button><button data-page="operacoes">🏢 Operações</button><button data-page="rh">🧑‍💼 RH</button><button data-page="recursos">📚 Recursos</button><button data-page="formacao">🎓 Cursos & Formação</button><button data-page="comunicacao">📢 Comunicação</button><button data-page="administracao">⚙ Administração</button><button data-page="alunos">👥 Alunos</button></nav><button id="logout" class="nav logout">↪ Terminar sessão</button></aside>
  <main class="main"><div class="top"><div><h1 id="pageTitle">Visão geral</h1><span id="userInfo" class="muted"></span></div><span class="pill">NOVA TODDLE SCHOOL</span></div><div id="content"></div></main>
 </section>
 <script>
@@ -46,8 +46,8 @@ $("logout").onclick=async()=>{await sb.auth.signOut();showLogin()};
 document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>render(b.dataset.page));
 async function render(page){
  document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
- const titles={inicio:"Visão geral",financeiro:"Financeiro",documentos:"Documentos",contabilidade:"Contabilidade",cadastros:"Centro de Cadastros",academico:"Módulo Académico",operacoes:"Operações da Escola",rh:"Recursos Humanos",recursos:"Recursos e Serviços",comunicacao:"Comunicação",administracao:"Administração",alunos:"Alunos"};$("pageTitle").textContent=titles[page]||page;
- if(page==="inicio")return overview(); if(page==="financeiro")return finance(); if(page==="documentos")return docs(); if(page==="contabilidade")return accounting(); if(page==="cadastros")return cadastros(); if(page==="academico")return moduloAcademico(); if(page==="operacoes")return moduloOperacoes(); if(page==="rh")return moduloRH(); if(page==="recursos")return moduloRecursos(); if(page==="comunicacao")return moduloComunicacao(); if(page==="administracao")return moduloAdministracao(); if(page==="alunos")return alunos(); $("content").innerHTML='<div class="panel"><h2>Alunos</h2></div>';
+ const titles={inicio:"Visão geral",formacao:"Cursos & Formação",financeiro:"Financeiro",documentos:"Documentos",contabilidade:"Contabilidade",cadastros:"Centro de Cadastros",academico:"Módulo Académico",operacoes:"Operações da Escola",rh:"Recursos Humanos",recursos:"Recursos e Serviços",comunicacao:"Comunicação",administracao:"Administração",alunos:"Alunos"};$("pageTitle").textContent=titles[page]||page;
+ if(page==="inicio")return overview(); if(page==="formacao")return formacaoView(); if(page==="financeiro")return finance(); if(page==="documentos")return docs(); if(page==="contabilidade")return accounting(); if(page==="cadastros")return cadastros(); if(page==="academico")return moduloAcademico(); if(page==="operacoes")return moduloOperacoes(); if(page==="rh")return moduloRH(); if(page==="recursos")return moduloRecursos(); if(page==="comunicacao")return moduloComunicacao(); if(page==="administracao")return moduloAdministracao(); if(page==="alunos")return alunos(); $("content").innerHTML='<div class="panel"><h2>Alunos</h2></div>';
 }
 async function overview(){
  const [c,p,d]=await Promise.all([sb.from("cobrancas_escolares").select("id,valor,estado",{count:"exact"}),sb.from("pagamentos_escolares").select("id,valor",{count:"exact"}),sb.from("documentos_fiscais").select("id,total,estado",{count:"exact"})]);
@@ -141,6 +141,217 @@ async function saveCadastro(table,payload,file,photoField="foto_url"){
  const {data,error}=await sb.from(table).insert(payload).select().single();
  if(error) throw error;
  return data;
+}
+</script>
+
+
+<script id="nova-formacao-layer">
+const FORM_TABS=[
+ ["dashboard","Visão geral"],
+ ["entidades","Centros verificados"],
+ ["cursos","Cursos"],
+ ["turmas","Turmas"],
+ ["formadores","Formadores"],
+ ["formandos","Formandos"],
+ ["inscricoes","Matrículas"],
+ ["lms","LMS / Conteúdos"],
+ ["certificados","Certificação"]
+];
+
+function formacaoNav(active){
+ return '<div class="actions" style="margin-bottom:14px">'+FORM_TABS.map(x=>'<button class="mini '+(x[0]===active?'active':'')+'" onclick="formacaoTab(\''+x[0]+'\')">'+x[1]+'</button>').join('')+'</div>';
+}
+
+async function formacaoView(){ await formacaoTab("dashboard"); }
+
+async function formacaoTab(tab){
+ $("pageTitle").textContent="Cursos & Formação";
+ let body=formacaoNav(tab);
+ if(tab==="dashboard"){
+   const [c,e,t,f,fd,i,cert]=await Promise.all([
+     sb.from("formacao_cursos").select("id",{count:"exact",head:true}),
+     sb.from("entidades_formadoras").select("id",{count:"exact",head:true}),
+     sb.from("formacao_turmas").select("id",{count:"exact",head:true}),
+     sb.from("formadores").select("id",{count:"exact",head:true}),
+     sb.from("formandos").select("id",{count:"exact",head:true}),
+     sb.from("formacao_inscricoes").select("id",{count:"exact",head:true}),
+     sb.from("certificacoes").select("id",{count:"exact",head:true})
+   ]);
+   body+='<div class="grid"><div class="stat"><span class="muted">Cursos</span><b>'+(c.count||0)+'</b></div><div class="stat"><span class="muted">Centros</span><b>'+(e.count||0)+'</b></div><div class="stat"><span class="muted">Turmas</span><b>'+(t.count||0)+'</b></div><div class="stat"><span class="muted">Matrículas</span><b>'+(i.count||0)+'</b></div></div>';
+   body+='<div class="grid"><div class="stat"><span class="muted">Formadores</span><b>'+(f.count||0)+'</b></div><div class="stat"><span class="muted">Formandos</span><b>'+(fd.count||0)+'</b></div><div class="stat"><span class="muted">Certificações</span><b>'+(cert.count||0)+'</b></div><div class="stat"><span class="muted">Modelo</span><b>NOVA</b></div></div>';
+   body+='<div class="panel"><div class="panel-head"><h2>Pipeline de formação</h2></div><p class="muted">Centro verificado → Curso → Turma/LMS → Formando → Matrícula → Aprendizagem → Avaliação → Conclusão → Certificação.</p><div class="actions"><button class="btn" onclick="formacaoTab(\'cursos\')">Gerir cursos</button><button class="mini" onclick="formacaoTab(\'entidades\')">Ver centros</button><button class="mini" onclick="formacaoTab(\'inscricoes\')">Controlar matrículas</button></div></div>';
+   $("content").innerHTML=body; return;
+ }
+ if(tab==="entidades"){await renderFormacaoEntidades(body);return}
+ if(tab==="cursos"){await renderFormacaoCursos(body);return}
+ if(tab==="turmas"){await renderFormacaoTurmas(body);return}
+ if(tab==="formadores"){await renderFormadores(body);return}
+ if(tab==="formandos"){await renderFormandos(body);return}
+ if(tab==="inscricoes"){await renderInscricoes(body);return}
+ if(tab==="lms"){await renderLms(body);return}
+ if(tab==="certificados"){await renderCertificados(body);return}
+}
+
+function formHeader(title,buttonText,handler){
+ return '<div class="panel-head"><h2>'+esc(title)+'</h2><div class="actions"><button class="btn" style="padding:9px 13px" onclick="'+handler+'">'+esc(buttonText)+'</button><button class="mini" onclick="formacaoTab(\'dashboard\')">Visão geral</button></div></div>';
+}
+
+async function renderFormacaoEntidades(body){
+ const {data,error}=await sb.from("entidades_formadoras").select("*").order("created_at",{ascending:false});
+ body+='<div class="panel">'+formHeader("Centros de Formação","Novo centro","novoCentro()")+'<p class="muted">Apenas centros ativos e verificados devem aparecer no catálogo público. O NOVA atua como plataforma/intermediário; o centro é a entidade formadora.</p>';
+ if(error){body+='<div class="danger">'+esc(error.message)+'</div>'}
+ else body+='<table class="table"><thead><tr><th>Centro</th><th>Licenciamento</th><th>Acreditação</th><th>Verificado</th><th>Contacto</th><th>Ações</th></tr></thead><tbody>'+((data||[]).map(x=>'<tr><td><b>'+esc(x.nome)+'</b><br><span class="muted">'+esc(x.municipio||"")+'</span></td><td>'+esc(x.estado_licenciamento||"—")+'</td><td>'+esc(x.estado_acreditacao||"—")+'</td><td>'+(x.verificado?'<span class="badge">VERIFICADO</span>':'<span class="badge">PENDENTE</span>')+'</td><td>'+esc(x.telefone||x.email||"—")+'</td><td><button class="mini" onclick="editarCentro(\''+x.id+'\')">Editar</button></td></tr>').join("")||'<tr><td colspan="6" class="empty">Nenhum centro registado.</td></tr>')+'</tbody></table>';
+ body+='</div><div id="formationModal"></div>';
+ $("content").innerHTML=body;
+ window._centros=data||[];
+}
+
+function novoCentro(){openCentroForm(null)}
+function editarCentro(id){openCentroForm(window._centros.find(x=>x.id===id))}
+function openCentroForm(x){
+ x=x||{nome:"",tipo_entidade:"CENTRO_FORMACAO",nif:"",estado_licenciamento:"PENDENTE",numero_licenca:"",estado_acreditacao:"NAO_ACREDITADA",numero_acreditacao:"",verificado:false,email:"",telefone:"",website:"",endereco:"",municipio:"",provincia:"",responsavel_nome:"",descricao:"",ativo:true};
+ $("formationModal").innerHTML='<div class="panel" style="border:2px solid #1677FF"><div class="panel-head"><h2>'+(x.id?"Editar centro":"Novo centro")+'</h2><button class="mini" onclick="$(\\'formationModal\\').innerHTML=\\'\\'">Fechar</button></div><div class="form-grid"><div><label>Nome do centro</label><input id="fe_nome" value="'+esc(x.nome)+'"></div><div><label>NIF</label><input id="fe_nif" value="'+esc(x.nif)+'"></div><div><label>Estado de licenciamento</label><select id="fe_lic"><option>PENDENTE</option><option>ATIVO</option><option>EXPIRADO</option><option>SUSPENSO</option></select></div><div><label>Nº licença</label><input id="fe_nlic" value="'+esc(x.numero_licenca)+'"></div><div><label>Estado de acreditação</label><select id="fe_acr"><option>NAO_ACREDITADA</option><option>PENDENTE</option><option>ACREDITADA</option><option>EXPIRADA</option></select></div><div><label>Nº acreditação</label><input id="fe_nacr" value="'+esc(x.numero_acreditacao)+'"></div><div><label>E-mail</label><input id="fe_email" value="'+esc(x.email)+'"></div><div><label>Telefone</label><input id="fe_tel" value="'+esc(x.telefone)+'"></div><div><label>Website</label><input id="fe_web" value="'+esc(x.website)+'"></div><div><label>Município</label><input id="fe_mun" value="'+esc(x.municipio)+'"></div><div><label>Província</label><input id="fe_prov" value="'+esc(x.provincia)+'"></div><div><label>Responsável</label><input id="fe_resp" value="'+esc(x.responsavel_nome)+'"></div><div style="grid-column:1/-1"><label>Descrição</label><input id="fe_desc" value="'+esc(x.descricao)+'"></div><div><label><input id="fe_ver" type="checkbox" '+(x.verificado?"checked":"")+' style="width:auto"> Centro verificado</label></div></div><div class="actions"><button class="btn" onclick="guardarCentro(\''+(x.id||"")+'\')">Guardar</button></div></div>';
+ $("fe_lic").value=x.estado_licenciamento||"PENDENTE";$("fe_acr").value=x.estado_acreditacao||"NAO_ACREDITADA";
+}
+async function guardarCentro(id){
+ const payload={instituicao_id:profile.instituicao_id,nome:$("fe_nome").value.trim(),tipo_entidade:"CENTRO_FORMACAO",nif:$("fe_nif").value.trim()||null,estado_licenciamento:$("fe_lic").value,numero_licenca:$("fe_nlic").value.trim()||null,estado_acreditacao:$("fe_acr").value,numero_acreditacao:$("fe_nacr").value.trim()||null,email:$("fe_email").value.trim()||null,telefone:$("fe_tel").value.trim()||null,website:$("fe_web").value.trim()||null,municipio:$("fe_mun").value.trim()||null,provincia:$("fe_prov").value.trim()||null,responsavel_nome:$("fe_resp").value.trim()||null,descricao:$("fe_desc").value.trim()||null,verificado:$("fe_ver").checked,ativo:true};
+ const r=id?await sb.from("entidades_formadoras").update(payload).eq("id",id):await sb.from("entidades_formadoras").insert(payload);
+ if(r.error){alert(r.error.message);return}await formacaoTab("entidades");
+}
+
+async function renderFormacaoCursos(body){
+ const {data,error}=await sb.from("formacao_cursos").select("*").order("destaque",{ascending:false}).order("nome");
+ body+='<div class="panel">'+formHeader("Catálogo de Cursos","Novo curso","novoCurso()")+'<p class="muted">105 cursos já existentes no Supabase. Aqui passam a ter gestão real de catálogo, preço, modalidade, publicação e entidade formadora.</p>';
+ if(error) body+='<div class="danger">'+esc(error.message)+'</div>';
+ else body+='<table class="table"><thead><tr><th>Curso</th><th>Tipo</th><th>Modalidade</th><th>Carga</th><th>Preço</th><th>Publicação</th><th>Centro</th><th>Ações</th></tr></thead><tbody>'+((data||[]).map(x=>'<tr><td><b>'+esc(x.nome)+'</b><br><span class="muted">'+esc(x.nivel||"")+'</span></td><td>'+esc(x.curso_tipo||"—")+'</td><td>'+esc(x.modalidade||"—")+'</td><td>'+esc(x.carga_horaria??"—")+'</td><td>'+money(x.preco)+' '+esc(x.moeda||"AOA")+'</td><td>'+(x.publicado?'<span class="badge">PUBLICADO</span>':'<span class="badge">RASCUNHO</span>')+'</td><td>'+esc(x.entidade_formadora_id||"—")+'</td><td><button class="mini" onclick="editarCurso(\''+x.id+'\')">Editar</button><button class="mini" onclick="abrirCursoDetalhe(\''+x.id+'\')">LMS</button></td></tr>').join("")||'<tr><td colspan="8" class="empty">Nenhum curso.</td></tr>')+'</tbody></table>';
+ body+='</div><div id="formationModal"></div>';
+ $("content").innerHTML=body;window._cursos=data||[];
+}
+
+function novoCurso(){openCursoForm(null)}
+function editarCurso(id){openCursoForm(window._cursos.find(x=>x.id===id))}
+function openCursoForm(x){
+ x=x||{nome:"",descricao:"",curso_tipo:"LIVRE",modalidade:"ONLINE",carga_horaria:0,preco:0,moeda:"AOA",nivel:"",estado_acreditacao:"NAO_APLICAVEL",entidade_certificadora:"NOVA TODDLE SCHOOL",pre_requisitos:"",objetivos:"",competencias:"",avaliacao_tipo:"FINAL",certificado_tipo:"CERTIFICADO",publicado:false,ativo:true,destaque:false,slug:""};
+ const centros=window._centros||[];
+ const options=centros.map(c=>'<option value="'+c.id+'">'+esc(c.nome)+(c.verificado?" • ✓":"")+'</option>').join("");
+ $("formationModal").innerHTML='<div class="panel" style="border:2px solid #7B4DFF"><div class="panel-head"><h2>'+(x.id?"Editar curso":"Novo curso")+'</h2><button class="mini" onclick="$(\\'formationModal\\').innerHTML=\\'\\'">Fechar</button></div><div class="form-grid"><div><label>Nome</label><input id="fc_nome" value="'+esc(x.nome)+'"></div><div><label>Slug</label><input id="fc_slug" value="'+esc(x.slug)+'" placeholder="curso-online"></div><div><label>Tipo</label><select id="fc_tipo"><option>LIVRE</option><option>PROFISSIONAL</option><option>QUALIFICACAO</option><option>CURSO_ONLINE</option></select></div><div><label>Modalidade</label><select id="fc_mod"><option>ONLINE</option><option>PRESENCIAL</option><option>HIBRIDA</option></select></div><div><label>Carga horária</label><input id="fc_carga" type="number" value="'+esc(x.carga_horaria??0)+'"></div><div><label>Preço</label><input id="fc_preco" type="number" step="0.01" value="'+esc(x.preco??0)+'"></div><div><label>Moeda</label><input id="fc_moeda" value="'+esc(x.moeda||"AOA")+'"></div><div><label>Nível</label><input id="fc_nivel" value="'+esc(x.nivel||"")+'"></div><div><label>Centro formador</label><select id="fc_ent"><option value="">Selecionar</option>'+options+'</select></div><div><label>Estado acreditação</label><select id="fc_acr"><option>NAO_APLICAVEL</option><option>PENDENTE</option><option>ACREDITADO</option><option>EXPIRADO</option></select></div><div><label>Certificadora</label><input id="fc_cert" value="'+esc(x.entidade_certificadora||"NOVA TODDLE SCHOOL")+'"></div><div><label>Tipo certificado</label><input id="fc_ctipo" value="'+esc(x.certificado_tipo||"CERTIFICADO")+'"></div><div style="grid-column:1/-1"><label>Descrição</label><input id="fc_desc" value="'+esc(x.descricao||"")+'"></div><div><label>Pré-requisitos</label><input id="fc_pre" value="'+esc(x.pre_requisitos||"")+'"></div><div><label>Objetivos</label><input id="fc_obj" value="'+esc(x.objetivos||"")+'"></div><div><label>Competências</label><input id="fc_comp" value="'+esc(x.competencias||"")+'"></div><div><label>Avaliação</label><input id="fc_av" value="'+esc(x.avaliacao_tipo||"FINAL")+'"></div><div><label><input id="fc_pub" type="checkbox" '+(x.publicado?"checked":"")+' style="width:auto"> Publicado</label></div><div><label><input id="fc_dest" type="checkbox" '+(x.destaque?"checked":"")+' style="width:auto"> Destaque</label></div></div><div class="actions"><button class="btn" onclick="guardarCurso(\''+(x.id||"")+'\')">Guardar curso</button></div></div>';
+ $("fc_ent").value=x.entidade_formadora_id||"";
+ $("fc_acr").value=x.estado_acreditacao||"NAO_APLICAVEL";
+ $("fc_tipo").value=x.curso_tipo||"LIVRE";$("fc_mod").value=x.modalidade||"ONLINE";
+}
+async function guardarCurso(id){
+ const nome=$("fc_nome").value.trim();if(!nome){alert("Informe o nome do curso.");return}
+ const slug=$("fc_slug").value.trim()||nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+ const payload={instituicao_id:profile.instituicao_id,nome,slug,descricao:$("fc_desc").value.trim()||null,curso_tipo:$("fc_tipo").value,modalidade:$("fc_mod").value,carga_horaria:Number($("fc_carga").value||0),preco:Number($("fc_preco").value||0),moeda:$("fc_moeda").value.trim()||"AOA",nivel:$("fc_nivel").value.trim()||null,entidade_formadora_id:$("fc_ent").value||null,estado_acreditacao:$("fc_acr").value,entidade_certificadora:$("fc_cert").value.trim()||null,certificado_tipo:$("fc_ctipo").value.trim()||null,pre_requisitos:$("fc_pre").value.trim()||null,objetivos:$("fc_obj").value.trim()||null,competencias:$("fc_comp").value.trim()||null,avaliacao_tipo:$("fc_av").value.trim()||"FINAL",publicado:$("fc_pub").checked,destaque:$("fc_dest").checked,ativo:true};
+ const r=id?await sb.from("formacao_cursos").update(payload).eq("id",id):await sb.from("formacao_cursos").insert(payload);
+ if(r.error){alert(r.error.message);return}await formacaoTab("cursos");
+}
+
+async function renderFormacaoTurmas(body){
+ const {data,error}=await sb.from("formacao_turmas").select("*").order("data_inicio",{ascending:false});
+ body+='<div class="panel">'+formHeader("Turmas de formação","Nova turma","novaTurma()")+'<table class="table"><thead><tr><th>Turma</th><th>Curso</th><th>Início</th><th>Fim</th><th>Vagas</th><th>Modalidade</th><th>Estado</th><th>Ações</th></tr></thead><tbody>';
+ if(error) body+='<tr><td colspan="8" class="danger">'+esc(error.message)+'</td></tr>';
+ else body+=(data||[]).map(x=>'<tr><td>'+esc(x.nome||x.codigo)+'</td><td>'+esc(x.curso_id)+'</td><td>'+esc(x.data_inicio||"—")+'</td><td>'+esc(x.data_fim||"—")+'</td><td>'+esc(x.limite_vagas??x.capacidade??"—")+'</td><td>'+esc(x.modalidade||"—")+'</td><td>'+esc(x.estado||"—")+'</td><td><button class="mini" onclick="editarTurma(\''+x.id+'\')">Editar</button></td></tr>').join("")||'<tr><td colspan="8" class="empty">Nenhuma turma criada.</td></tr>';
+ body+='</tbody></table></div><div id="formationModal"></div>'; $("content").innerHTML=body;window._turmas=data||[];
+}
+function novaTurma(){openTurmaForm(null)} function editarTurma(id){openTurmaForm(window._turmas.find(x=>x.id===id))}
+function openTurmaForm(x){
+ x=x||{codigo:"",nome:"",curso_id:"",data_inicio:"",data_fim:"",limite_vagas:20,modalidade:"ONLINE",horario:"",local:"",estado:"PLANEADA"};
+ const opts=(window._cursos||[]).map(c=>'<option value="'+c.id+'">'+esc(c.nome)+'</option>').join("");
+ $("formationModal").innerHTML='<div class="panel" style="border:2px solid #19B86B"><div class="panel-head"><h2>'+(x.id?"Editar turma":"Nova turma")+'</h2><button class="mini" onclick="$(\\'formationModal\\').innerHTML=\\'\\'">Fechar</button></div><div class="form-grid"><div><label>Código</label><input id="ft_cod" value="'+esc(x.codigo||"")+'"></div><div><label>Nome</label><input id="ft_nome" value="'+esc(x.nome||"")+'"></div><div><label>Curso</label><select id="ft_curso"><option value="">Selecionar</option>'+opts+'</select></div><div><label>Início</label><input id="ft_ini" type="date" value="'+esc(x.data_inicio||"")+'"></div><div><label>Fim</label><input id="ft_fim" type="date" value="'+esc(x.data_fim||"")+'"></div><div><label>Vagas</label><input id="ft_vagas" type="number" value="'+esc(x.limite_vagas??20)+'"></div><div><label>Modalidade</label><select id="ft_mod"><option>ONLINE</option><option>PRESENCIAL</option><option>HIBRIDA</option></select></div><div><label>Horário</label><input id="ft_hor" value="'+esc(x.horario||"")+'"></div><div><label>Local</label><input id="ft_loc" value="'+esc(x.local||"")+'"></div><div><label>Estado</label><select id="ft_est"><option>PLANEADA</option><option>ABERTA</option><option>EM_CURSO</option><option>CONCLUIDA</option><option>CANCELADA</option></select></div></div><div class="actions"><button class="btn" onclick="guardarTurma(\''+(x.id||"")+'\')">Guardar turma</button></div></div>';
+ $("ft_curso").value=x.curso_id||"";$("ft_mod").value=x.modalidade||"ONLINE";$("ft_est").value=x.estado||"PLANEADA";
+}
+async function carregarCursosParaTurma(){const {data}=await sb.from("formacao_cursos").select("id,nome").order("nome");window._cursos=data||[]}
+async function guardarTurma(id){
+ if(!(window._cursos||[]).length) await carregarCursosParaTurma();
+ const payload={instituicao_id:profile.instituicao_id,curso_id:$("ft_curso").value||null,codigo:$("ft_cod").value.trim()||null,nome:$("ft_nome").value.trim()||null,data_inicio:$("ft_ini").value||null,data_fim:$("ft_fim").value||null,limite_vagas:Number($("ft_vagas").value||0),capacidade:Number($("ft_vagas").value||0),modalidade:$("ft_mod").value,horario:$("ft_hor").value.trim()||null,local:$("ft_loc").value.trim()||null,estado:$("ft_est").value};
+ if(!payload.curso_id){alert("Selecione o curso.");return}
+ const r=id?await sb.from("formacao_turmas").update(payload).eq("id",id):await sb.from("formacao_turmas").insert(payload);
+ if(r.error){alert(r.error.message);return}await formacaoTab("turmas");
+}
+
+async function renderFormadores(body){
+ const {data,error}=await sb.from("formadores").select("*").order("created_at",{ascending:false});
+ body+='<div class="panel">'+formHeader("Formadores","Novo formador","novoFormador()")+'<table class="table"><thead><tr><th>Nº</th><th>Contacto</th><th>Especialidade</th><th>Experiência</th><th>Estado</th><th>Ações</th></tr></thead><tbody>';
+ if(error) body+='<tr><td colspan="6" class="danger">'+esc(error.message)+'</td></tr>'; else body+=(data||[]).map(x=>'<tr><td>'+esc(x.numero_formador||"—")+'</td><td>'+esc(x.email||x.telefone||"—")+'</td><td>'+esc(x.especialidade||"—")+'</td><td>'+esc(x.experiencia_anos??"—")+' anos</td><td>'+esc(x.estado||"—")+'</td><td><button class="mini" onclick="editarFormador(\''+x.id+'\')">Editar</button></td></tr>').join("")||'<tr><td colspan="6" class="empty">Nenhum formador.</td></tr>';
+ body+='</tbody></table></div><div id="formationModal"></div>'; $("content").innerHTML=body;window._formadores=data||[];
+}
+function novoFormador(){openFormadorForm(null)} function editarFormador(id){openFormadorForm(window._formadores.find(x=>x.id===id))}
+function openFormadorForm(x){
+ x=x||{numero_formador:"",especialidade:"",qualificacoes:"",experiencia_anos:0,estado:"ATIVO",email:"",telefone:"",bi_numero:""};
+ $("formationModal").innerHTML='<div class="panel" style="border:2px solid #00C2D7"><div class="panel-head"><h2>'+(x.id?"Editar formador":"Novo formador")+'</h2><button class="mini" onclick="$(\\'formationModal\\').innerHTML=\\'\\'">Fechar</button></div><div class="form-grid"><div><label>Número</label><input id="ff_num" value="'+esc(x.numero_formador)+'"></div><div><label>E-mail</label><input id="ff_email" value="'+esc(x.email)+'"></div><div><label>Telefone</label><input id="ff_tel" value="'+esc(x.telefone)+'"></div><div><label>BI</label><input id="ff_bi" value="'+esc(x.bi_numero)+'"></div><div><label>Especialidade</label><input id="ff_esp" value="'+esc(x.especialidade)+'"></div><div><label>Experiência (anos)</label><input id="ff_exp" type="number" value="'+esc(x.experiencia_anos||0)+'"></div><div><label>Qualificações</label><input id="ff_qual" value="'+esc(x.qualificacoes||"")+'"></div><div><label>Estado</label><select id="ff_est"><option>ATIVO</option><option>INATIVO</option><option>PENDENTE</option></select></div></div><div class="actions"><button class="btn" onclick="guardarFormador(\''+(x.id||"")+'\')">Guardar</button></div></div>';
+ $("ff_est").value=x.estado||"ATIVO";
+}
+async function guardarFormador(id){
+ const payload={instituicao_id:profile.instituicao_id,numero_formador:$("ff_num").value.trim()||null,email:$("ff_email").value.trim()||null,telefone:$("ff_tel").value.trim()||null,bi_numero:$("ff_bi").value.trim()||null,especialidade:$("ff_esp").value.trim()||null,experiencia_anos:Number($("ff_exp").value||0),qualificacoes:$("ff_qual").value.trim()||null,estado:$("ff_est").value};
+ const r=id?await sb.from("formadores").update(payload).eq("id",id):await sb.from("formadores").insert(payload);
+ if(r.error){alert(r.error.message);return}await formacaoTab("formadores");
+}
+
+async function renderFormandos(body){
+ const {data,error}=await sb.from("formandos").select("*").order("created_at",{ascending:false});
+ body+='<div class="panel">'+formHeader("Formandos","Novo formando","novoFormando()")+'<table class="table"><thead><tr><th>Número</th><th>Nome</th><th>Contacto</th><th>Local</th><th>Estado</th><th>Ações</th></tr></thead><tbody>';
+ if(error) body+='<tr><td colspan="6" class="danger">'+esc(error.message)+'</td></tr>'; else body+=(data||[]).map(x=>'<tr><td>'+esc(x.numero_formando||"—")+'</td><td><b>'+esc(x.nome_completo)+'</b></td><td>'+esc(x.email||x.telefone||"—")+'</td><td>'+esc(x.municipio||x.provincia||"—")+'</td><td>'+esc(x.estado||"—")+'</td><td><button class="mini" onclick="editarFormando(\''+x.id+'\')">Editar</button></td></tr>').join("")||'<tr><td colspan="6" class="empty">Nenhum formando.</td></tr>';
+ body+='</tbody></table></div><div id="formationModal"></div>'; $("content").innerHTML=body;window._formandos=data||[];
+}
+function novoFormando(){openFormandoForm(null)} function editarFormando(id){openFormandoForm(window._formandos.find(x=>x.id===id))}
+function openFormandoForm(x){
+ x=x||{numero_formando:"",nome_completo:"",nif:"",data_nascimento:"",telefone:"",email:"",morada:"",provincia:"",municipio:"",estado:"ATIVO"};
+ $("formationModal").innerHTML='<div class="panel" style="border:2px solid #FF7A00"><div class="panel-head"><h2>'+(x.id?"Editar formando":"Novo formando")+'</h2><button class="mini" onclick="$(\\'formationModal\\').innerHTML=\\'\\'">Fechar</button></div><div class="form-grid"><div><label>Número</label><input id="fm_num" value="'+esc(x.numero_formando)+'"></div><div><label>Nome completo</label><input id="fm_nome" value="'+esc(x.nome_completo)+'"></div><div><label>NIF</label><input id="fm_nif" value="'+esc(x.nif)+'"></div><div><label>Nascimento</label><input id="fm_nasc" type="date" value="'+esc(x.data_nascimento)+'"></div><div><label>Telefone</label><input id="fm_tel" value="'+esc(x.telefone)+'"></div><div><label>E-mail</label><input id="fm_email" value="'+esc(x.email)+'"></div><div><label>Morada</label><input id="fm_morada" value="'+esc(x.morada)+'"></div><div><label>Província</label><input id="fm_prov" value="'+esc(x.provincia)+'"></div><div><label>Município</label><input id="fm_mun" value="'+esc(x.municipio)+'"></div><div><label>Estado</label><select id="fm_est"><option>ATIVO</option><option>INATIVO</option><option>PENDENTE</option></select></div></div><div class="actions"><button class="btn" onclick="guardarFormando(\''+(x.id||"")+'\')">Guardar</button></div></div>';
+ $("fm_est").value=x.estado||"ATIVO";
+}
+async function guardarFormando(id){
+ const nome=$("fm_nome").value.trim();if(!nome){alert("Informe o nome do formando.");return}
+ const payload={instituicao_id:profile.instituicao_id,numero_formando:$("fm_num").value.trim()||null,nome_completo:nome,nif:$("fm_nif").value.trim()||null,data_nascimento:$("fm_nasc").value||null,telefone:$("fm_tel").value.trim()||null,email:$("fm_email").value.trim()||null,morada:$("fm_morada").value.trim()||null,provincia:$("fm_prov").value.trim()||null,municipio:$("fm_mun").value.trim()||null,estado:$("fm_est").value};
+ const r=id?await sb.from("formandos").update(payload).eq("id",id):await sb.from("formandos").insert(payload);
+ if(r.error){alert(r.error.message);return}await formacaoTab("formandos");
+}
+
+async function renderInscricoes(body){
+ const {data,error}=await sb.from("formacao_inscricoes").select("id,estado,data_inscricao,progresso,nota_final,curso_id,formando_id,turma_id,certificado_id,cobranca_id").order("data_inscricao",{ascending:false});
+ body+='<div class="panel">'+formHeader("Matrículas","Nova matrícula","novaInscricao()")+'<p class="muted">A matrícula passa a ser controlada separadamente da candidatura: pendente → confirmada → em curso → concluída → certificada.</p><table class="table"><thead><tr><th>Data</th><th>Formando</th><th>Curso</th><th>Turma</th><th>Progresso</th><th>Nota</th><th>Estado</th></tr></thead><tbody>';
+ if(error) body+='<tr><td colspan="7" class="danger">'+esc(error.message)+'</td></tr>';
+ else {
+   const [fd,cu,tu]=await Promise.all([sb.from("formandos").select("id,nome_completo"),sb.from("formacao_cursos").select("id,nome"),sb.from("formacao_turmas").select("id,nome")]);
+   const fm=Object.fromEntries((fd.data||[]).map(x=>[x.id,x.nome_completo])), cm=Object.fromEntries((cu.data||[]).map(x=>[x.id,x.nome])), tm=Object.fromEntries((tu.data||[]).map(x=>[x.id,x.nome]));
+   body+=(data||[]).map(x=>'<tr><td>'+esc(x.data_inscricao)+'</td><td>'+esc(fm[x.formando_id]||x.formando_id)+'</td><td>'+esc(cm[x.curso_id]||x.curso_id)+'</td><td>'+esc(tm[x.turma_id]||"—")+'</td><td>'+esc(x.progresso??0)+'%</td><td>'+esc(x.nota_final??"—")+'</td><td><span class="badge">'+esc(x.estado)+'</span></td></tr>').join("")||'<tr><td colspan="7" class="empty">Nenhuma matrícula.</td></tr>';
+ }
+ body+='</tbody></table></div><div id="formationModal"></div>'; $("content").innerHTML=body;
+}
+async function novaInscricao(){
+ const [f,c,t]=await Promise.all([sb.from("formandos").select("id,nome_completo").order("nome_completo"),sb.from("formacao_cursos").select("id,nome").eq("ativo",true).order("nome"),sb.from("formacao_turmas").select("id,nome,curso_id").order("data_inicio",{ascending:false})]);
+ const fs=(f.data||[]).map(x=>'<option value="'+x.id+'">'+esc(x.nome_completo)+'</option>').join("");
+ const cs=(c.data||[]).map(x=>'<option value="'+x.id+'">'+esc(x.nome)+'</option>').join("");
+ const ts=(t.data||[]).map(x=>'<option value="'+x.id+'">'+esc(x.nome)+'</option>').join("");
+ $("formationModal").innerHTML='<div class="panel" style="border:2px solid #FF7A00"><div class="panel-head"><h2>Nova matrícula</h2><button class="mini" onclick="$(\\'formationModal\\').innerHTML=\\'\\'">Fechar</button></div><div class="form-grid"><div><label>Formando</label><select id="fi_formando"><option value="">Selecionar</option>'+fs+'</select></div><div><label>Curso</label><select id="fi_curso"><option value="">Selecionar</option>'+cs+'</select></div><div><label>Turma</label><select id="fi_turma"><option value="">Sem turma / online</option>'+ts+'</select></div><div><label>Estado</label><select id="fi_estado"><option>PENDENTE</option><option>CONFIRMADA</option><option>EM_CURSO</option><option>CONCLUIDA</option></select></div></div><div class="actions"><button class="btn" onclick="guardarInscricao()">Guardar matrícula</button></div></div>';
+}
+async function guardarInscricao(){
+ const payload={instituicao_id:profile.instituicao_id,formando_id:$("fi_formando").value,curso_id:$("fi_curso").value,turma_id:$("fi_turma").value||null,estado:$("fi_estado").value,data_inscricao:new Date().toISOString().slice(0,10),progresso:0};
+ if(!payload.formando_id||!payload.curso_id){alert("Selecione formando e curso.");return}
+ const r=await sb.from("formacao_inscricoes").insert(payload);if(r.error){alert(r.error.message);return}await formacaoTab("inscricoes");
+}
+
+async function renderLms(body){
+ const [m,a,v]=await Promise.all([sb.from("formacao_modulos").select("id,curso_id,titulo,ordem,ativo",{count:"exact"}),sb.from("formacao_aulas").select("id,modulo_id,titulo,tipo,publicado",{count:"exact"}),sb.from("formacao_avaliacoes_online").select("id,curso_id,titulo,ativo",{count:"exact"})]);
+ body+='<div class="grid"><div class="stat"><span class="muted">Módulos</span><b>'+(m.count||0)+'</b></div><div class="stat"><span class="muted">Aulas</span><b>'+(a.count||0)+'</b></div><div class="stat"><span class="muted">Avaliações online</span><b>'+(v.count||0)+'</b></div><div class="stat"><span class="muted">Cursos online</span><b>'+((await sb.from("formacao_cursos").select("id",{count:"exact",head:true}).eq("modalidade","ONLINE")).count||0)+'</b></div></div>';
+ body+='<div class="panel">'+formHeader("LMS / Conteúdos","Abrir cursos","formacaoTab(\'cursos\')")+'<p class="muted">A base já contém 420 módulos, 420 aulas e 105 avaliações online. O próximo passo operacional é ligar o conteúdo ao curso e à matrícula.</p></div>';
+ $("content").innerHTML=body;
+}
+async function renderCertificados(body){
+ const {data,error}=await sb.from("certificacoes").select("*").order("data_emissao",{ascending:false}).limit(200);
+ body+='<div class="panel">'+formHeader("Certificação","Atualizar","formacaoTab(\'certificados\')")+'<p class="muted">Certificados emitidos, código de verificação, QR e documento final.</p><table class="table"><thead><tr><th>Número</th><th>Código</th><th>Emissão</th><th>Tipo</th><th>Estado</th><th>Documento</th></tr></thead><tbody>';
+ if(error) body+='<tr><td colspan="6" class="danger">'+esc(error.message)+'</td></tr>'; else body+=(data||[]).map(x=>'<tr><td>'+esc(x.numero_certificado||"—")+'</td><td>'+esc(x.codigo_verificacao||"—")+'</td><td>'+esc(x.data_emissao||"—")+'</td><td>'+esc(x.certificado_tipo||x.tipo_certificacao||"—")+'</td><td><span class="badge">'+esc(x.estado||"—")+'</span></td><td>'+esc(x.documento_url||"—")+'</td></tr>').join("")||'<tr><td colspan="6" class="empty">Nenhuma certificação emitida.</td></tr>';
+ body+='</tbody></table></div>'; $("content").innerHTML=body;
+}
+
+async function abrirCursoDetalhe(id){
+ const [c,m,a]=await Promise.all([
+  sb.from("formacao_cursos").select("*").eq("id",id).single(),
+  sb.from("formacao_modulos").select("*").eq("curso_id",id).order("ordem"),
+  sb.from("formacao_aulas").select("*,formacao_modulos!inner(curso_id)").eq("formacao_modulos.curso_id",id).order("ordem")
+ ]);
+ const x=c.data;if(c.error){alert(c.error.message);return}
+ $("formationModal").innerHTML='<div class="panel" style="border:2px solid #7B4DFF"><div class="panel-head"><h2>'+esc(x.nome)+' — LMS</h2><button class="mini" onclick="$(\\'formationModal\\').innerHTML=\\'\\'">Fechar</button></div><p class="muted">'+esc(x.descricao||"")+'</p><p><b>'+((m.data||[]).length)+'</b> módulos · <b>'+((a.data||[]).length)+'</b> aulas</p><table class="table"><thead><tr><th>Ordem</th><th>Módulo</th><th>Aulas</th></tr></thead><tbody>'+((m.data||[]).map(md=>'<tr><td>'+esc(md.ordem)+'</td><td>'+esc(md.titulo)+'</td><td>'+((a.data||[]).filter(z=>z.modulo_id===md.id).length)+'</td></tr>').join("")||'<tr><td colspan="3" class="empty">Sem módulos.</td></tr>')+'</tbody></table></div>';
 }
 </script>
 
